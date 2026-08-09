@@ -88,11 +88,17 @@ async function renderConfigCuidados(plantaId) {
     `
   ).join('');
 
+  const errorEl = qs('#error-config-cuidados');
   qsa('#config-cuidados input').forEach((input) => {
     input.addEventListener('change', async () => {
       const tipo = input.id.replace('frecuencia-', '');
       const valor = input.value ? Number(input.value) : null;
-      await guardarConfig(plantaId, tipo, valor);
+      try {
+        await guardarConfig(plantaId, tipo, valor);
+        clearError(errorEl);
+      } catch (err) {
+        showError(errorEl, err.message);
+      }
     });
   });
 }
