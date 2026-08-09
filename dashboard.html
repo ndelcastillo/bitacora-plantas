@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mis plantas — Bitácora de Plantas</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h3 style="margin:0;">Bitácora de Plantas</h3>
+    <button class="btn btn-secondary" id="btn-logout">Cerrar sesión</button>
+  </header>
+
+  <main class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: var(--space-8);">
+      <h1>Mis plantas</h1>
+      <button class="btn btn-primary" id="btn-nueva-planta">Agregar planta</button>
+    </div>
+
+    <section id="grid-plantas" class="grid-plantas"></section>
+    <p id="mensaje-vacio" hidden>Todavía no tenés plantas. Agregá la primera.</p>
+  </main>
+
+  <dialog id="dialog-nueva-planta" class="card" style="width: 100%; max-width: 420px; border: 1px solid var(--color-border);">
+    <h2>Agregar planta</h2>
+    <form id="form-nueva-planta">
+      <div class="field">
+        <label for="nombre">Nombre</label>
+        <input class="input" id="nombre" required />
+      </div>
+      <div class="field">
+        <label for="especie">Especie</label>
+        <input class="input" id="especie" />
+      </div>
+      <div class="field">
+        <label for="ubicacion">Ubicación</label>
+        <input class="input" id="ubicacion" />
+      </div>
+      <div class="field">
+        <label for="fecha_adquisicion">Fecha de adquisición</label>
+        <input class="input" type="date" id="fecha_adquisicion" />
+      </div>
+      <div class="field">
+        <label for="foto">Foto</label>
+        <input type="file" id="foto" accept="image/*" />
+      </div>
+      <p class="field-error" id="error-nueva-planta" hidden></p>
+      <div style="display:flex; gap: var(--space-3); margin-top: var(--space-4);">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" class="btn btn-secondary" id="btn-cancelar-planta">Cancelar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="js/pages/dashboard.js"></script>
+</body>
+</html>
