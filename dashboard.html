@@ -3,58 +3,79 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mis plantas — Bitácora de Plantas</title>
+  <title>Colección — Bitácora de Plantas</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
-  <header class="topbar">
-    <h3 style="margin:0;">Bitácora de Plantas</h3>
-    <button class="btn btn-secondary" id="btn-logout">Cerrar sesión</button>
+<body class="catalog-page catalog-page--coleccion">
+  <header class="catalog-header">
+    <p class="catalog-header-left">
+      Tu colección personal: las plantas que sumaste desde el catálogo
+      para cuidar en casa.
+    </p>
+    <nav class="catalog-nav" aria-label="Principal">
+      <a class="catalog-nav-link" href="plantas.html">Index</a>
+      <a class="catalog-nav-link is-active" href="dashboard.html">Colección <span id="coleccion-count">(0)</span></a>
+    </nav>
+    <button
+      type="button"
+      class="catalog-filters-toggle"
+      id="catalog-filters-toggle"
+      aria-expanded="true"
+      aria-controls="catalog-filters"
+    >
+      Filtros
+    </button>
+    <div class="catalog-meta">
+      <p>Buenos Aires, ARG 23:46</p>
+    </div>
   </header>
 
-  <main class="container">
-    <p class="field-error" id="error-pagina" hidden></p>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: var(--space-8);">
-      <h1>Mis plantas</h1>
-      <button class="btn btn-primary" id="btn-nueva-planta">Agregar planta</button>
-    </div>
+  <section class="catalog-filters" aria-label="Filtros de la colección">
+    <form id="catalog-filters" class="catalog-filters-panel">
+      <div class="catalog-filters-options">
+        <label class="catalog-filter-option"><input type="checkbox" name="ubicacion" value="Interior" /> interior</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="ubicacion" value="Exterior" /> exterior</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="ubicacion" value="Ambos" /> ambos</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="luz" value="Alta" /> alta</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="luz" value="Media" /> media</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="luz" value="Baja" /> baja</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="luz" value="Directa" /> directa</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="luz" value="Indirecta" /> indirecta</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="luz" value="Sombra" /> sombra</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="suelo" value="Arenoso" /> arenoso</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="suelo" value="Arcilloso" /> arcilloso</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="suelo" value="Franco" /> franco</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="cuidado" value="Fácil" /> fácil</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="cuidado" value="Medio" /> medio</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="cuidado" value="Exigente" /> exigente</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="riego" value="Cada 5 días" /> cada 5 días</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="riego" value="Cada 7 días" /> cada 7 días</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="riego" value="Cada 10 días" /> cada 10 días</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="riego" value="Cada 14 días" /> cada 14 días</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="riego" value="Cada 21 días" /> cada 21 días</label>
+        <label class="catalog-filter-option"><input type="checkbox" name="riego" value="Cada 30 días" /> cada 30 días</label>
+      </div>
+      <label class="catalog-search">
+        <span class="visually-hidden">Buscar plantas</span>
+        <input
+          type="search"
+          id="catalog-search"
+          name="q"
+          placeholder="Buscar"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </label>
+    </form>
+  </section>
 
-    <section id="grid-plantas" class="grid-plantas"></section>
-    <p id="mensaje-vacio" hidden>Todavía no tenés plantas. Agregá la primera.</p>
+  <main class="catalog-list" aria-label="Mi colección">
+    <div id="coleccion-rows" class="catalog-rows"></div>
+    <p id="mensaje-vacio" class="catalog-empty" hidden>
+      Todavía no hay plantas en tu colección. Sumá algunas desde Index con (Agregar).
+    </p>
   </main>
 
-  <dialog id="dialog-nueva-planta" class="card" style="width: 100%; max-width: 420px; border: 1px solid var(--color-border);">
-    <h2>Agregar planta</h2>
-    <form id="form-nueva-planta">
-      <div class="field">
-        <label for="nombre">Nombre</label>
-        <input class="input" id="nombre" required />
-      </div>
-      <div class="field">
-        <label for="especie">Especie</label>
-        <input class="input" id="especie" />
-      </div>
-      <div class="field">
-        <label for="ubicacion">Ubicación</label>
-        <input class="input" id="ubicacion" />
-      </div>
-      <div class="field">
-        <label for="fecha_adquisicion">Fecha de adquisición</label>
-        <input class="input" type="date" id="fecha_adquisicion" />
-      </div>
-      <div class="field">
-        <label for="foto">Foto</label>
-        <input type="file" id="foto" accept="image/*" />
-      </div>
-      <p class="field-error" id="error-nueva-planta" hidden></p>
-      <div style="display:flex; gap: var(--space-3); margin-top: var(--space-4);">
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <button type="button" class="btn btn-secondary" id="btn-cancelar-planta">Cancelar</button>
-      </div>
-    </form>
-  </dialog>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="js/pages/dashboard.js"></script>
+  <script type="module" src="js/pages/coleccion.js"></script>
 </body>
 </html>
