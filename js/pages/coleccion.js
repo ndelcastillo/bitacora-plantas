@@ -1,6 +1,6 @@
 import { qs, escapeHtml } from '../utils/dom.js';
 import { getSession } from '../services/auth.js';
-import { listarColeccion, quitarDeColeccion } from '../services/coleccion.js';
+import { listarColeccion, quitarDeColeccion, onColeccionChange } from '../services/coleccion.js';
 import {
   refreshCatalogFilters,
   wireCatalogFilters,
@@ -145,6 +145,14 @@ function iniciarColeccion() {
     onChange: () => refreshCatalogFilters(root),
   });
   syncColeccionNavCount();
+
+  // Escuchar cambios en tiempo real
+  const unsubscribe = onColeccionChange(() => {
+    render(root).catch(console.error);
+  });
+
+  // Limpiar suscripción si el usuario se va de la página
+  window.addEventListener('beforeunload', unsubscribe, { once: true });
 }
 
 iniciarPagina(async function init() {

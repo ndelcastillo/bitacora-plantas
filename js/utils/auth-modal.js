@@ -64,21 +64,41 @@ export function wireAuthModal() {
     clearStatus(statusEl);
     const email = qs('#email-auth', dialog).value;
     const password = qs('#password-auth', dialog).value;
+    const submitBtn = qs('#btn-submit-auth', dialog);
+
+    if (!email || !password) {
+      showError(errorEl, 'Por favor completa todos los campos');
+      return;
+    }
+
+    if (password.length < 6) {
+      showError(errorEl, 'La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Cargando...';
 
     try {
       const data = modo === 'login' ? await signIn(email, password) : await signUp(email, password);
 
       if (!data?.session) {
-        showStatus(statusEl, 'Te enviamos un email para confirmar tu cuenta. Confirmalo y después iniciá sesión.');
+        showStatus(statusEl, '✓ Cuenta creada. Te enviamos un email de confirmación. Confirmalo y después iniciá sesión.');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
         return;
       }
 
       const callback = onSuccess;
       succeeded = true;
+      submitBtn.textContent = '✓ ' + originalText;
       dialog.close();
       if (callback) await callback(data.session);
     } catch (err) {
       showError(errorEl, err.message);
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
     }
   });
 

@@ -8,6 +8,10 @@ let coleccionCache = null;
 let cacheTimestamp = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
+// Listeners para cambios en tiempo real
+let realtimeSubscription = null;
+let onChangeCallbacks = [];
+
 function leerDelCache() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -173,4 +177,45 @@ export async function quitarDeColeccion(id) {
 
 export function idDesdePlanta({ nombre, especie, ubicacion }) {
   return [nombre, especie, ubicacion].join('::').toLowerCase();
+}
+
+// Sincronización en tiempo real con Supabase
+async function setupRealtimeSync() {
+  const session = await getSession();
+  if (!session?.user?.id) return;
+
+  // Cancelar suscripción anterior si existe
+  if (realtimeSubscription) {
+    supabase.removeChannel(realtimeSubscription);
+  }
+
+  // Suscribirse a cambios en tiempo real
+  realtimeSubscription = supabase
+    .channel(`user_collection:${session.user.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'user_collection',
+        filter: `user_id=eq.${session.user.id}`,
+      },
+      () => {
+        // Invalidar cache cuando hay cambios
+        coleccionCache = null;
+        // Notificar a listeners
+        onChangeCallbacks.forEach(cb => cb?.());
+      }
+    )
+    .subscribe();
+}
+
+export function onColeccionChange(callback) {
+  onChangeCallbacks.push(callback);
+  setupRealtimeSync().catch(console.error);
+
+  // Retornar función para desuscribirse
+  return () => {
+    onChangeCallbacks = onChangeCallbacks.filter(cb => cb !== callback);
+  };
 }
