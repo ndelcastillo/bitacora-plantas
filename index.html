@@ -8,6 +8,7 @@
 </head>
 <body>
   <main class="container" style="max-width: 480px; padding-top: 80px;">
+    <p class="field-error" id="error-pagina" hidden></p>
     <h1 id="titulo-form">Iniciar sesión</h1>
 
     <form id="form-auth">
@@ -20,6 +21,7 @@
         <input class="input" type="password" id="password" minlength="6" required />
       </div>
       <p class="field-error" id="error-auth" hidden></p>
+      <p class="field-status" id="status-auth" hidden></p>
       <button class="btn btn-primary" type="submit" id="btn-submit">Iniciar sesión</button>
     </form>
 

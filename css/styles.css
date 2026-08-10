@@ -137,6 +137,15 @@ h3 { font-size: 20px; line-height: 26px; }
   display: none;
 }
 
+/* Confirmación inline (no es un error): gris, sin el rojo de alerta. */
+.field-status {
+  color: var(--color-gray-mid);
+  font-size: 16px;
+}
+.field-status[hidden] {
+  display: none;
+}
+
 .badge-vencido {
   color: var(--color-error);
   font-weight: 400;

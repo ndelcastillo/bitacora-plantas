@@ -1,7 +1,8 @@
-import { getSession, signOut } from '../services/auth.js';
+import { signOut } from '../services/auth.js';
 import { listarPlantas, crearPlanta, subirFotoPlanta, actualizarPlanta, obtenerUrlFoto } from '../services/plantas.js';
-import { calcularEstadoDePlanta } from '../services/cuidados.js';
-import { qs, showError, clearError } from '../utils/dom.js';
+import { calcularEstadosDePlantas } from '../services/cuidados.js';
+import { qs, showError, clearError, escapeHtml } from '../utils/dom.js';
+import { requerirSesion, iniciarPagina } from '../utils/guard.js';
 
 const ETIQUETAS_ESTADO = {
   vencido: { texto: 'Vencido', clase: 'badge-vencido' },
@@ -10,14 +11,7 @@ const ETIQUETAS_ESTADO = {
   sin_registrar: { texto: 'Sin registrar', clase: 'badge-neutral' },
 };
 
-async function requerirSesion() {
-  const session = await getSession();
-  if (!session) {
-    window.location.href = 'index.html';
-    return null;
-  }
-  return session;
-}
+const ETIQUETA_DESCONOCIDA = { texto: 'Sin datos', clase: 'badge-neutral' };
 
 async function renderPlantas() {
   const grid = qs('#grid-plantas');
@@ -31,24 +25,43 @@ async function renderPlantas() {
   }
   mensajeVacio.hidden = true;
 
-  for (const planta of plantas) {
-    const [estado, fotoUrl] = await Promise.all([
-      calcularEstadoDePlanta(planta),
-      obtenerUrlFoto(planta.foto_url),
-    ]);
+  // Un solo lote de consultas para todos los estados. Si falla, seguimos
+  // dibujando la grilla con badges neutros en vez de dejarla vacía.
+  let estados = new Map();
+  try {
+    estados = await calcularEstadosDePlantas(plantas);
+  } catch (err) {
+    console.error('No se pudieron calcular los estados de las plantas', err);
+  }
 
-    const etiqueta = ETIQUETAS_ESTADO[estado];
+  // Una foto rota no puede tumbar el resto de la grilla.
+  const fotos = await Promise.all(
+    plantas.map(async (planta) => {
+      try {
+        return await obtenerUrlFoto(planta.foto_url);
+      } catch (err) {
+        console.error(`No se pudo obtener la foto de la planta ${planta.id}`, err);
+        return null;
+      }
+    })
+  );
+
+  plantas.forEach((planta, i) => {
+    const fotoUrl = fotos[i];
+    const etiqueta = ETIQUETAS_ESTADO[estados.get(planta.id)] ?? ETIQUETA_DESCONOCIDA;
+    const nombre = escapeHtml(planta.nombre);
+
     const card = document.createElement('a');
-    card.href = `planta.html?id=${planta.id}`;
+    card.href = `planta.html?id=${encodeURIComponent(planta.id)}`;
     card.className = 'planta-card';
     card.innerHTML = `
-      ${fotoUrl ? `<img src="${fotoUrl}" alt="${planta.nombre}" />` : `<div class="placeholder-foto"></div>`}
-      <h3>${planta.nombre}</h3>
-      <p>${planta.especie ?? ''}</p>
+      ${fotoUrl ? `<img src="${escapeHtml(fotoUrl)}" alt="${nombre}" />` : `<div class="placeholder-foto"></div>`}
+      <h3>${nombre}</h3>
+      <p>${escapeHtml(planta.especie)}</p>
       <p class="${etiqueta.clase}">${etiqueta.texto}</p>
     `;
     grid.appendChild(card);
-  }
+  });
 }
 
 function wireLogout() {
@@ -63,8 +76,21 @@ function wireNuevaPlanta() {
   const form = qs('#form-nueva-planta');
   const errorEl = qs('#error-nueva-planta');
 
+  // Si `crearPlanta` funcionó pero la foto falló, dejamos el diálogo abierto
+  // para reintentar. Guardamos el id creado para que ese reintento suba la foto
+  // en vez de insertar una segunda planta.
+  let pendiente = null;
+
+  function resetDialogo() {
+    form.reset();
+    clearError(errorEl);
+    pendiente = null;
+  }
+
   qs('#btn-nueva-planta').addEventListener('click', () => dialog.showModal());
   qs('#btn-cancelar-planta').addEventListener('click', () => dialog.close());
+  // Cubre tanto el botón Cancelar como cerrar con Escape.
+  dialog.addEventListener('close', resetDialogo);
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -79,13 +105,16 @@ function wireNuevaPlanta() {
     const archivoFoto = qs('#foto').files[0];
 
     try {
-      const planta = await crearPlanta(datos);
-      let advertenciaFoto = null;
+      if (!pendiente) {
+        const planta = await crearPlanta(datos);
+        pendiente = { id: planta.id, userId: planta.user_id };
+      }
 
+      let advertenciaFoto = null;
       if (archivoFoto) {
         try {
-          const path = await subirFotoPlanta(planta.user_id, planta.id, archivoFoto);
-          await actualizarPlanta(planta.id, { foto_url: path });
+          const path = await subirFotoPlanta(pendiente.userId, pendiente.id, archivoFoto);
+          await actualizarPlanta(pendiente.id, { foto_url: path });
         } catch (fotoError) {
           advertenciaFoto = `Planta guardada, pero la foto no se pudo subir: ${fotoError.message}`;
         }
@@ -97,7 +126,6 @@ function wireNuevaPlanta() {
         // Dejamos el diálogo abierto para que el usuario vea la advertencia.
         showError(errorEl, advertenciaFoto);
       } else {
-        form.reset();
         dialog.close();
       }
     } catch (err) {
@@ -106,11 +134,11 @@ function wireNuevaPlanta() {
   });
 }
 
-(async function init() {
+iniciarPagina(async function init() {
   const session = await requerirSesion();
   if (!session) return;
 
   wireLogout();
   wireNuevaPlanta();
   await renderPlantas();
-})();
+});
