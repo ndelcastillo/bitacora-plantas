@@ -1,4 +1,5 @@
 import { qs, escapeHtml } from '../utils/dom.js';
+import { getSession } from '../services/auth.js';
 import { listarColeccion, quitarDeColeccion } from '../services/coleccion.js';
 import {
   refreshCatalogFilters,
@@ -12,6 +13,8 @@ import {
   riegoParaEstacion,
   wireRiegoEstacion,
 } from '../utils/catalog-riego-estacion.js';
+import { wireAuthModal } from '../utils/auth-modal.js';
+import { iniciarPagina } from '../utils/guard.js';
 
 function riegosDePlanta(planta) {
   if (planta.riegos && typeof planta.riegos === 'object') return planta.riegos;
@@ -72,16 +75,16 @@ function entryMarkup(planta) {
   `;
 }
 
-function render(root) {
+async function render(root) {
   const vacio = qs('#mensaje-vacio');
   if (!root || !vacio) return;
 
-  const plantas = listarColeccion();
+  const plantas = await listarColeccion();
   root.innerHTML = '';
 
   if (plantas.length === 0) {
     vacio.hidden = false;
-    syncColeccionNavCount();
+    await syncColeccionNavCount();
     return;
   }
 
@@ -91,7 +94,7 @@ function render(root) {
     const riegos = riegosDePlanta(planta);
     const entry = document.createElement('div');
     entry.className = 'catalog-entry';
-    entry.dataset.id = planta.id || '';
+    entry.dataset.id = planta.planta_id || planta.id || '';
     entry.dataset.nombre = planta.nombre || '';
     entry.dataset.especie = planta.especie || '';
     entry.dataset.riego = riegoParaEstacion(riegos, planta.riego, estacionActual());
@@ -106,13 +109,13 @@ function render(root) {
 
   refreshRiegoEstacion(root);
   refreshCatalogFilters(root);
-  syncColeccionNavCount();
+  await syncColeccionNavCount();
 }
 
 function wireEliminar(root) {
   if (!root) return;
 
-  root.addEventListener('click', (event) => {
+  root.addEventListener('click', async (event) => {
     const btn = event.target.closest('.coleccion-eliminar-btn');
     if (!btn || !root.contains(btn)) return;
 
@@ -122,19 +125,39 @@ function wireEliminar(root) {
     const id = btn.dataset.id;
     if (!id) return;
 
-    const result = quitarDeColeccion(id);
+    const result = await quitarDeColeccion(id);
     if (result.ok || result.reason === 'missing') {
-      render(root);
+      await render(root);
     }
   });
 }
 
 const root = qs('#coleccion-rows');
-render(root);
-wireEliminar(root);
-wireCatalogFilters(root);
-wireFiltersToggle();
-wireRiegoEstacion(root, {
-  onChange: () => refreshCatalogFilters(root),
+const authModal = wireAuthModal();
+
+function iniciarColeccion() {
+  qs('#coleccion-contenido').hidden = false;
+  render(root);
+  wireEliminar(root);
+  wireCatalogFilters(root);
+  wireFiltersToggle();
+  wireRiegoEstacion(root, {
+    onChange: () => refreshCatalogFilters(root),
+  });
+  syncColeccionNavCount();
+}
+
+iniciarPagina(async function init() {
+  const session = await getSession();
+  if (session) {
+    iniciarColeccion();
+    return;
+  }
+
+  authModal.open({
+    onSuccess: () => iniciarColeccion(),
+    onDismiss: () => {
+      window.location.href = 'index.html';
+    },
+  });
 });
-syncColeccionNavCount();

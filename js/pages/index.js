@@ -5,12 +5,14 @@ import {
   idDesdePlanta,
   quitarDeColeccion,
 } from '../services/coleccion.js';
+import { getSession } from '../services/auth.js';
 import { wireCatalogAccordion } from '../utils/catalog-accordion.js';
 import { wireCatalogFilters, wireFiltersToggle } from '../utils/catalog-filters.js';
 import { wireCatalogView } from '../utils/catalog-view.js';
 import { syncColeccionNavCount } from '../utils/coleccion-nav.js';
 import { wireRiegoEstacion } from '../utils/catalog-riego-estacion.js';
 import { refreshCatalogFilters } from '../utils/catalog-filters.js';
+import { wireAuthModal } from '../utils/auth-modal.js';
 
 function parseGaleria(raw) {
   if (!raw) return [];
@@ -88,20 +90,43 @@ function syncFilaColeccion(id, added) {
   });
 }
 
-function syncBotones() {
-  qsa('.catalog-entry').forEach((entry) => {
+async function syncBotones() {
+  const entries = qsa('.catalog-entry');
+  for (const entry of entries) {
     const btn = entry.querySelector('.catalog-add[data-id]');
-    if (!btn) return;
-    const added = estaEnColeccion(btn.dataset.id);
+    if (!btn) continue;
+    const added = await estaEnColeccion(btn.dataset.id);
     qsa('.catalog-add[data-id]', entry).forEach((b) => {
       if (added) marcarAgregado(b);
       else marcarDisponible(b);
     });
     entry.classList.toggle('is-in-coleccion', added);
-  });
+  }
 }
 
-function wireAdd(root) {
+async function toggleColeccion(btn) {
+  const planta = plantaDesdeBoton(btn);
+  if (!planta.id) {
+    planta.id = idDesdePlanta(planta);
+  }
+
+  if (btn.classList.contains('is-added')) {
+    const result = await quitarDeColeccion(planta.id);
+    if (result.ok || result.reason === 'missing') {
+      syncFilaColeccion(planta.id, false);
+      await syncColeccionNavCount();
+    }
+    return;
+  }
+
+  const result = await agregarAColeccion(planta);
+  if (result.ok || result.reason === 'duplicate') {
+    syncFilaColeccion(planta.id, true);
+    await syncColeccionNavCount();
+  }
+}
+
+function wireAdd(root, authModal) {
   if (!root) return;
 
   root.addEventListener('click', (event) => {
@@ -111,36 +136,42 @@ function wireAdd(root) {
     event.preventDefault();
     event.stopPropagation();
 
-    const planta = plantaDesdeBoton(btn);
-    if (!planta.id) {
-      planta.id = idDesdePlanta(planta);
-    }
-
-    if (btn.classList.contains('is-added')) {
-      const result = quitarDeColeccion(planta.id);
-      if (result.ok || result.reason === 'missing') {
-        syncFilaColeccion(planta.id, false);
-        syncColeccionNavCount();
+    getSession().then((session) => {
+      if (session) {
+        toggleColeccion(btn);
+        return;
       }
-      return;
-    }
+      authModal.open({ onSuccess: () => toggleColeccion(btn) });
+    });
+  });
+}
 
-    const result = agregarAColeccion(planta);
-    if (result.ok || result.reason === 'duplicate') {
-      syncFilaColeccion(planta.id, true);
-      syncColeccionNavCount();
-    }
+function wireNavColeccion(authModal) {
+  const link = qs('#nav-coleccion');
+  if (!link) return;
+
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    getSession().then((session) => {
+      if (session) {
+        window.location.href = link.href;
+        return;
+      }
+      authModal.open({ onSuccess: () => window.location.href = link.href });
+    });
   });
 }
 
 const root = qs('#catalog-rows');
+const authModal = wireAuthModal();
 wireCatalogAccordion(root);
-wireAdd(root);
+wireAdd(root, authModal);
+wireNavColeccion(authModal);
 wireCatalogFilters(root);
 wireFiltersToggle();
 wireCatalogView();
 wireRiegoEstacion(root, {
   onChange: () => refreshCatalogFilters(root),
 });
-syncBotones();
-syncColeccionNavCount();
+syncBotones().catch(console.error);
+syncColeccionNavCount().catch(console.error);

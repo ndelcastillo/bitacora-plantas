@@ -1,8 +1,9 @@
 import { qs } from './dom.js';
 import { contarColeccion } from '../services/coleccion.js';
 
-export function syncColeccionNavCount() {
+export async function syncColeccionNavCount() {
   const countEl = qs('#coleccion-count');
   if (!countEl) return;
-  countEl.textContent = `(${contarColeccion()})`;
+  const count = await contarColeccion();
+  countEl.textContent = `(${count})`;
 }

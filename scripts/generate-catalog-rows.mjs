@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PLANTAS_PATH = path.join(__dirname, '..', 'plantas.html');
+const PLANTAS_PATH = path.join(__dirname, '..', 'index.html');
 
 /** Seeds con ubicación + luz coherente (ejemplos de interior + exterior/ambos) */
 const SEEDS = [
@@ -278,7 +278,7 @@ function main() {
   const endIdx = plantas.indexOf(END_MARKER);
 
   if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
-    console.error('No se encontraron marcadores catalog-rows en plantas.html');
+    console.error('No se encontraron marcadores catalog-rows en index.html');
     process.exit(1);
   }
 
