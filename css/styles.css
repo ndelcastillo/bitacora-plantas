@@ -736,121 +736,117 @@ select.input {
   display: none;
 }
 
-.catalog-page[data-view='3'] .catalog-row.is-header {
+.catalog-add--spotlight {
   display: none;
 }
 
-.catalog-page[data-view='3'] .catalog-list {
-  overflow-x: visible;
+.catalog-gallery-3d {
+  position: relative;
+  height: 300vh;
+  margin-top: 54px;
 }
 
-.catalog-page[data-view='3'] .catalog-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 18vh;
-  padding: 8vh 0 20vh;
+.catalog-gallery-3d[hidden] {
+  display: none;
 }
 
-.catalog-page[data-view='3'] .catalog-rows:hover .catalog-entry {
-  opacity: 1;
-}
-
-.catalog-page[data-view='3'] .catalog-entry .catalog-row,
-.catalog-page[data-view='3'] .catalog-entry .catalog-tile,
-.catalog-page[data-view='3'] .catalog-entry .catalog-accordion {
-  display: none !important;
-}
-
-.catalog-page[data-view='3'] .catalog-entry:not(.is-filtered-out) .catalog-spotlight {
-  display: grid;
-  grid-template-columns: minmax(140px, 1fr) auto minmax(140px, 1fr);
-  align-items: stretch;
-  column-gap: var(--space-6);
-  width: 100%;
-}
-
-.catalog-spotlight-side {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  min-width: 0;
-  padding: 2px 0;
-}
-
-.catalog-spotlight-top {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  max-width: 100%;
-}
-
-.catalog-spotlight-name {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.2;
-}
-
-.catalog-spotlight-bottom {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.2;
-  opacity: 0.85;
-}
-
-.catalog-spotlight-media {
-  margin: 0;
-  width: min(38vw, 420px);
-  aspect-ratio: 3 / 4;
+.catalog-gallery-3d-preview {
+  position: sticky;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 200px;
+  margin: 0 auto;
   overflow: hidden;
   background: var(--color-border);
 }
 
-.catalog-spotlight-media img {
+.catalog-gallery-3d-preview img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.catalog-add--spotlight {
+.catalog-gallery-3d-stage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  perspective: 1500px;
+}
+
+.catalog-gallery-3d-ring {
+  position: absolute;
+  top: 19%;
+  left: 49%;
+  transform-style: preserve-3d;
+  transform: translateX(-50%) rotateX(55deg);
+}
+
+.catalog-gallery-3d-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90px;
+  height: 120px;
+  background: var(--color-border);
+  margin: 10px;
+  transform-style: preserve-3d;
+}
+
+.catalog-gallery-3d-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.catalog-page[data-view='3'] .catalog-row.is-header {
   display: none;
 }
 
-.catalog-page[data-view='3'] .catalog-add--spotlight {
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: flex-start;
-  flex-shrink: 0;
-  min-width: 0;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  font-size: 14px;
-  line-height: 1.2;
-  color: var(--color-black);
-  opacity: 1;
-}
-
-.catalog-page[data-view='3'] .catalog-add--spotlight.is-added {
-  opacity: 1;
+.catalog-page[data-view='3'] #catalog-rows {
+  display: none;
 }
 
 @media (max-width: 799px) {
-  .catalog-page[data-view='3'] .catalog-entry:not(.is-filtered-out) .catalog-spotlight {
-    grid-template-columns: 1fr;
-    row-gap: var(--space-4);
+  .catalog-gallery-3d-item {
+    width: 56px;
+    height: 74px;
+    margin: 6px;
   }
 
-  .catalog-page[data-view='3'] .catalog-spotlight-media {
-    width: min(78vw, 360px);
-    justify-self: center;
+  .catalog-gallery-3d-preview {
+    width: 220px;
+    height: 150px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-gallery-3d-stage {
+    perspective: none;
   }
 
-  .catalog-page[data-view='3'] .catalog-spotlight-side {
-    order: -1;
-    gap: var(--space-3);
+  .catalog-gallery-3d-ring {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    transform: none;
+  }
+
+  .catalog-gallery-3d-item {
+    position: static;
+    transform: none !important;
+  }
+
+  .catalog-gallery-3d-preview {
+    display: none;
   }
 }
 
