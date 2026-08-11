@@ -1,4 +1,5 @@
 import { qs, qsa } from './dom.js';
+import { wireCatalogGallery3D } from './catalog-gallery-3d.js';
 
 const STORAGE_KEY = 'bitacora-catalog-view';
 
@@ -10,17 +11,22 @@ function setActiveButtons(switcher, view) {
   });
 }
 
-function applyView(page, view) {
+function applyView(page, view, gallery3d) {
   page.dataset.view = view;
 
-  const view3 = qs('#mensaje-view-3');
-  if (view3) view3.hidden = true;
+  if (view === '3') {
+    gallery3d.activar();
+  } else {
+    gallery3d.desactivar();
+  }
 }
 
 export function wireCatalogView() {
   const page = qs('.catalog-page');
   const switcher = qs('.catalog-view-switch');
   if (!page || !switcher) return;
+
+  const gallery3d = wireCatalogGallery3D();
 
   let initial = '1';
   try {
@@ -30,7 +36,7 @@ export function wireCatalogView() {
     /* ignore */
   }
 
-  applyView(page, initial);
+  applyView(page, initial, gallery3d);
   setActiveButtons(switcher, initial);
 
   switcher.addEventListener('click', (event) => {
@@ -38,7 +44,7 @@ export function wireCatalogView() {
     if (!btn || !switcher.contains(btn)) return;
     const view = btn.dataset.view;
     if (!view) return;
-    applyView(page, view);
+    applyView(page, view, gallery3d);
     setActiveButtons(switcher, view);
     try {
       localStorage.setItem(STORAGE_KEY, view);

@@ -111,9 +111,14 @@
       <span>Cuidado</span>
       <span class="catalog-cell--action">Colección</span>
     </div>
-    <p id="mensaje-view-3" class="catalog-empty" hidden>
-      Vista 3 todavía no está definida.
-    </p>
+    <div id="catalog-gallery-3d" class="catalog-gallery-3d" hidden>
+      <div class="catalog-gallery-3d-preview">
+        <img src="" alt="" />
+      </div>
+      <div class="catalog-gallery-3d-stage">
+        <div class="catalog-gallery-3d-ring"></div>
+      </div>
+    </div>
     <div id="catalog-rows" class="catalog-rows">
 <!-- catalog-rows:start -->
 <div class="catalog-entry" data-riego="Cada 5 días" data-riegos="{&quot;verano&quot;:&quot;Cada 5 días&quot;,&quot;primavera&quot;:&quot;Cada 7 días&quot;,&quot;otoño&quot;:&quot;Cada 7 días&quot;,&quot;invierno&quot;:&quot;Cada 14 días&quot;}" data-luz="Baja" data-ubicacion="Interior" data-suelo="Arcilloso" data-cuidado="Fácil">
@@ -8694,6 +8699,8 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.3/ScrollTrigger.min.js" defer></script>
   <script type="module" src="js/pages/index.js"></script>
 </body>
 </html>

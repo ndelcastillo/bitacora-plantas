@@ -110,7 +110,7 @@ export async function agregarAColeccion(planta) {
     suelo: planta.suelo,
     cuidado: planta.cuidado,
     estado: planta.estado || 'Sin registrar',
-    ultimoRiego: planta.ultimoRiego,
+    ultimoriego: planta.ultimoRiego,
     imagen: planta.imagen || null,
     galeria: Array.isArray(planta.galeria) ? planta.galeria : [],
   };
