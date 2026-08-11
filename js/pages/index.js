@@ -162,13 +162,70 @@ function wireNavColeccion(authModal) {
   });
 }
 
+function wireSidebarNavColeccion(authModal) {
+  const link = qs('#sidebar-nav-coleccion');
+  if (!link) return;
+
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    closeSidebar();
+    getSession().then((session) => {
+      if (session) {
+        window.location.href = link.href;
+        return;
+      }
+      authModal.open({ onSuccess: () => window.location.href = link.href });
+    });
+  });
+}
+
+function toggleSidebar() {
+  const sidebar = qs('#catalog-sidebar');
+  const toggle = qs('#catalog-menu-toggle');
+  if (!sidebar || !toggle) return;
+
+  const isOpen = sidebar.classList.toggle('is-open');
+  toggle.setAttribute('aria-expanded', isOpen);
+  document.body.classList.toggle('sidebar-open', isOpen);
+}
+
+function closeSidebar() {
+  const sidebar = qs('#catalog-sidebar');
+  const toggle = qs('#catalog-menu-toggle');
+  if (!sidebar || !toggle) return;
+
+  sidebar.classList.remove('is-open');
+  toggle.setAttribute('aria-expanded', 'false');
+  document.body.classList.remove('sidebar-open');
+}
+
+function wireSidebarToggle() {
+  const toggle = qs('#catalog-menu-toggle');
+  if (!toggle) return;
+
+  toggle.addEventListener('click', toggleSidebar);
+
+  const closeBtn = qs('#catalog-sidebar-close');
+  closeBtn?.addEventListener('click', closeSidebar);
+
+  const backdrop = document.body;
+  backdrop.addEventListener('click', (event) => {
+    const sidebar = qs('#catalog-sidebar');
+    if (sidebar && sidebar.classList.contains('is-open') && !sidebar.contains(event.target) && !toggle.contains(event.target)) {
+      closeSidebar();
+    }
+  });
+}
+
 const root = qs('#catalog-rows');
 const authModal = wireAuthModal();
 wireCatalogAccordion(root);
 wireAdd(root, authModal);
 wireNavColeccion(authModal);
+wireSidebarNavColeccion(authModal);
 wireCatalogFilters(root);
 wireFiltersToggle();
+wireSidebarToggle();
 wireCatalogView();
 wireRiegoEstacion(root, {
   onChange: () => refreshCatalogFilters(root),

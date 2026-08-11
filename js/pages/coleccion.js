@@ -132,6 +132,44 @@ function wireEliminar(root) {
   });
 }
 
+function toggleSidebar() {
+  const sidebar = qs('#catalog-sidebar');
+  const toggle = qs('#catalog-menu-toggle');
+  if (!sidebar || !toggle) return;
+
+  const isOpen = sidebar.classList.toggle('is-open');
+  toggle.setAttribute('aria-expanded', isOpen);
+  document.body.classList.toggle('sidebar-open', isOpen);
+}
+
+function closeSidebar() {
+  const sidebar = qs('#catalog-sidebar');
+  const toggle = qs('#catalog-menu-toggle');
+  if (!sidebar || !toggle) return;
+
+  sidebar.classList.remove('is-open');
+  toggle.setAttribute('aria-expanded', 'false');
+  document.body.classList.remove('sidebar-open');
+}
+
+function wireSidebarToggle() {
+  const toggle = qs('#catalog-menu-toggle');
+  if (!toggle) return;
+
+  toggle.addEventListener('click', toggleSidebar);
+
+  const closeBtn = qs('#catalog-sidebar-close');
+  closeBtn?.addEventListener('click', closeSidebar);
+
+  const backdrop = document.body;
+  backdrop.addEventListener('click', (event) => {
+    const sidebar = qs('#catalog-sidebar');
+    if (sidebar && sidebar.classList.contains('is-open') && !sidebar.contains(event.target) && !toggle.contains(event.target)) {
+      closeSidebar();
+    }
+  });
+}
+
 const root = qs('#coleccion-rows');
 const authModal = wireAuthModal();
 
@@ -141,6 +179,7 @@ function iniciarColeccion() {
   wireEliminar(root);
   wireCatalogFilters(root);
   wireFiltersToggle();
+  wireSidebarToggle();
   wireRiegoEstacion(root, {
     onChange: () => refreshCatalogFilters(root),
   });

@@ -25,10 +25,31 @@
     >
       Filtros
     </button>
+    <button
+      type="button"
+      class="catalog-menu-toggle"
+      id="catalog-menu-toggle"
+      aria-expanded="false"
+      aria-controls="catalog-sidebar"
+    >
+      Menú
+    </button>
     <div class="catalog-meta">
       <p>Buenos Aires, ARG 23:46</p>
     </div>
   </header>
+
+  <aside class="catalog-sidebar" id="catalog-sidebar" aria-label="Menú de navegación">
+    <div class="catalog-sidebar-top">
+      <button type="button" class="catalog-sidebar-close" id="catalog-sidebar-close">Cerrar</button>
+    </div>
+    <p class="catalog-sidebar-label">(Navegación)</p>
+    <nav class="catalog-sidebar-nav" aria-label="Principal">
+      <a class="catalog-sidebar-link" href="index.html">Index</a>
+      <a class="catalog-sidebar-link is-active" href="coleccion.html">Colección <span id="sidebar-coleccion-count">(0)</span></a>
+    </nav>
+    <p class="catalog-sidebar-datetime">Buenos Aires, ARG 23:46</p>
+  </aside>
 
   <div id="coleccion-contenido" hidden>
     <section class="catalog-filters" aria-label="Filtros de la colección">

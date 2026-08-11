@@ -9,8 +9,9 @@
 <body class="catalog-page">
   <header class="catalog-header">
     <p class="catalog-header-left">
-      Bitácora de Plantas es un espacio para registrar y cuidar la colección
-      de tu casa — explorá el catálogo y sumá las que ya tenés.
+      <span class="catalog-header-left-full">Bitácora de Plantas es un espacio para registrar y cuidar la colección
+      de tu casa — explorá el catálogo y sumá las que ya tenés.</span>
+      <span class="catalog-header-left-short">Bitácora de Plantas</span>
     </p>
     <nav class="catalog-nav" aria-label="Principal">
       <a class="catalog-nav-link is-active" href="index.html">Index</a>
@@ -25,6 +26,15 @@
     >
       Filtros
     </button>
+    <button
+      type="button"
+      class="catalog-menu-toggle"
+      id="catalog-menu-toggle"
+      aria-expanded="false"
+      aria-controls="catalog-sidebar"
+    >
+      Menú
+    </button>
     <div class="catalog-meta">
       <p>Buenos Aires, ARG 23:46</p>
       <div class="catalog-view-switch" role="group" aria-label="Vista de grilla">
@@ -36,6 +46,18 @@
       </div>
     </div>
   </header>
+
+  <aside class="catalog-sidebar" id="catalog-sidebar" aria-label="Menú de navegación">
+    <div class="catalog-sidebar-top">
+      <button type="button" class="catalog-sidebar-close" id="catalog-sidebar-close">Cerrar</button>
+    </div>
+    <p class="catalog-sidebar-label">(Navegación)</p>
+    <nav class="catalog-sidebar-nav" aria-label="Principal">
+      <a class="catalog-sidebar-link is-active" href="index.html">Index</a>
+      <a class="catalog-sidebar-link" href="coleccion.html" id="sidebar-nav-coleccion">Colección <span id="sidebar-coleccion-count">(0)</span></a>
+    </nav>
+    <p class="catalog-sidebar-datetime">Buenos Aires, ARG 23:46</p>
+  </aside>
 
   <section class="catalog-filters" aria-label="Filtros del catálogo" hidden>
     <form id="catalog-filters" class="catalog-filters-panel">

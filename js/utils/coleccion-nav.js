@@ -3,7 +3,9 @@ import { contarColeccion } from '../services/coleccion.js';
 
 export async function syncColeccionNavCount() {
   const countEl = qs('#coleccion-count');
-  if (!countEl) return;
+  const sidebarCountEl = qs('#sidebar-coleccion-count');
+  if (!countEl && !sidebarCountEl) return;
   const count = await contarColeccion();
-  countEl.textContent = `(${count})`;
+  if (countEl) countEl.textContent = `(${count})`;
+  if (sidebarCountEl) sidebarCountEl.textContent = `(${count})`;
 }
