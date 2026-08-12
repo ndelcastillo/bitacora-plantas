@@ -146,6 +146,12 @@ function wireAdd(root, authModal) {
   });
 }
 
+async function onGallery3DSeleccion(btn) {
+  const added = await estaEnColeccion(btn.dataset.id);
+  if (added) marcarAgregado(btn);
+  else marcarDisponible(btn);
+}
+
 function wireNavColeccion(authModal) {
   const link = qs('#nav-coleccion');
   if (!link) return;
@@ -218,15 +224,16 @@ function wireSidebarToggle() {
 }
 
 const root = qs('#catalog-rows');
+const catalogList = qs('.catalog-list');
 const authModal = wireAuthModal();
 wireCatalogAccordion(root);
-wireAdd(root, authModal);
+wireAdd(catalogList, authModal);
 wireNavColeccion(authModal);
 wireSidebarNavColeccion(authModal);
 wireCatalogFilters(root);
 wireFiltersToggle();
 wireSidebarToggle();
-wireCatalogView();
+wireCatalogView({ onGallery3DSeleccion });
 wireRiegoEstacion(root, {
   onChange: () => refreshCatalogFilters(root),
 });

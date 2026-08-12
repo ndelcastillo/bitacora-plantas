@@ -145,12 +145,11 @@ export async function quitarDeColeccion(id) {
   }
 
   try {
-    // Buscar por planta_id o id
     const { data: items, error: selectError } = await supabase
       .from('user_collection')
       .select('id')
       .eq('user_id', session.user.id)
-      .or(`planta_id.eq.${id},id.eq.${id}`);
+      .eq('planta_id', id);
 
     if (selectError) throw selectError;
     if (!items || items.length === 0) {
@@ -161,7 +160,7 @@ export async function quitarDeColeccion(id) {
       .from('user_collection')
       .delete()
       .eq('user_id', session.user.id)
-      .or(`planta_id.eq.${id},id.eq.${id}`);
+      .eq('planta_id', id);
 
     if (deleteError) throw deleteError;
 

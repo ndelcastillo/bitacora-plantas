@@ -21,12 +21,12 @@ function applyView(page, view, gallery3d) {
   }
 }
 
-export function wireCatalogView() {
+export function wireCatalogView({ onGallery3DSeleccion } = {}) {
   const page = qs('.catalog-page');
   const switcher = qs('.catalog-view-switch');
   if (!page || !switcher) return;
 
-  const gallery3d = wireCatalogGallery3D();
+  const gallery3d = wireCatalogGallery3D({ onSeleccion: onGallery3DSeleccion });
 
   let initial = '1';
   try {
