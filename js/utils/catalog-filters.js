@@ -52,6 +52,18 @@ function applyFilters(form, root, searchInput) {
       if (panel) panel.hidden = true;
     }
   });
+
+  // Una categoría cuyas plantas quedaron todas filtradas no debe dejar colgados
+  // el nombre, la línea y los títulos de columna sin nada debajo.
+  qsa('.catalog-group', root).forEach((group) => {
+    const visibles = qsa('.catalog-entry:not(.is-filtered-out)', group).length;
+    group.classList.toggle('is-empty', visibles === 0);
+
+    // El contador sigue a los filtros: dejarlo en el total mostraría "(26)" con
+    // una sola planta a la vista.
+    const contador = qs('.catalog-category-count', group);
+    if (contador) contador.textContent = `(${visibles})`;
+  });
 }
 
 function enforceSingleOption(form, input) {

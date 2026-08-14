@@ -13,6 +13,7 @@ import { syncColeccionNavCount } from '../utils/coleccion-nav.js';
 import { wireRiegoEstacion } from '../utils/catalog-riego-estacion.js';
 import { refreshCatalogFilters } from '../utils/catalog-filters.js';
 import { wireAuthModal } from '../utils/auth-modal.js';
+import { wireReloj } from '../utils/reloj.js';
 
 function parseGaleria(raw) {
   if (!raw) return [];
@@ -226,6 +227,7 @@ function wireSidebarToggle() {
 const root = qs('#catalog-rows');
 const catalogList = qs('.catalog-list');
 const authModal = wireAuthModal();
+wireReloj();
 wireCatalogAccordion(root);
 wireAdd(catalogList, authModal);
 wireNavColeccion(authModal);

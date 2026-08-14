@@ -36,7 +36,7 @@
       Menú
     </button>
     <div class="catalog-meta">
-      <p>Buenos Aires, ARG 23:46</p>
+      <p>Buenos Aires, ARG <time data-reloj>23:46</time></p>
       <div class="catalog-view-switch" role="group" aria-label="Vista de grilla">
         <button type="button" class="catalog-view-btn is-active" data-view="1" aria-pressed="true">1</button>
         <span class="catalog-view-sep" aria-hidden="true">||</span>
@@ -56,7 +56,7 @@
       <a class="catalog-sidebar-link is-active" href="index.html">Index</a>
       <a class="catalog-sidebar-link" href="coleccion.html" id="sidebar-nav-coleccion">Colección <span id="sidebar-coleccion-count">(0)</span></a>
     </nav>
-    <p class="catalog-sidebar-datetime">Buenos Aires, ARG 23:46</p>
+    <p class="catalog-sidebar-datetime">Buenos Aires, ARG <time data-reloj>23:46</time></p>
   </aside>
 
   <section class="catalog-filters" aria-label="Filtros del catálogo" hidden>
@@ -99,19 +99,6 @@
   </section>
 
   <main class="catalog-list" aria-label="Catálogo de plantas">
-    <div class="catalog-row is-header" role="row">
-      <span>Nombre</span>
-      <span>Especie</span>
-      <span>Sol</span>
-      <span>Luminosidad</span>
-      <button type="button" class="catalog-riego-toggle" id="riego-estacion" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
-        Riego <span id="riego-estacion-label">(verano)</span>
-      </button>
-      <span>Clima</span>
-      <span>Suelo</span>
-      <span>Cuidado</span>
-      <span class="catalog-cell--action">Colección</span>
-    </div>
     <div id="catalog-gallery-3d" class="catalog-gallery-3d" hidden>
       <div class="catalog-gallery-3d-stage">
         <div class="catalog-gallery-3d-preview-wrap">
@@ -125,7 +112,22 @@
     </div>
     <div id="catalog-rows" class="catalog-rows">
 <!-- catalog-rows:start -->
-<div class="catalog-category" role="row"><span class="catalog-category-label">Plantas de interior</span></div>
+<section class="catalog-group">
+<div class="catalog-category" role="row"><span class="catalog-category-label">Plantas de interior</span><span class="catalog-category-count">(26)</span></div>
+<div class="catalog-group-table">
+<div class="catalog-row is-header" role="row">
+  <span>Nombre</span>
+  <span>Especie</span>
+  <span>Sol</span>
+  <span>Luminosidad</span>
+  <button type="button" class="catalog-riego-toggle" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
+    Riego <span class="riego-estacion-label">(verano)</span>
+  </button>
+  <span>Clima</span>
+  <span>Suelo</span>
+  <span>Cuidado</span>
+  <span class="catalog-cell--action">Colección</span>
+</div>
 <div class="catalog-entry" data-riego="Cada 10 días" data-riegos="{&quot;verano&quot;:&quot;Cada 7 días&quot;,&quot;primavera&quot;:&quot;Cada 10 días&quot;,&quot;otoño&quot;:&quot;Cada 10 días&quot;,&quot;invierno&quot;:&quot;Cada 14 días&quot;}" data-clima="Cálido" data-luz="Baja" data-ubicacion="Sombra" data-suelo="Franco" data-cuidado="Fácil">
   <figure class="catalog-tile">
     <div class="catalog-tile-head">
@@ -1452,7 +1454,24 @@
     </div>
   </div>
 </div>
-<div class="catalog-category" role="row"><span class="catalog-category-label">Herbáceas perennes</span></div>
+</div>
+</section>
+<section class="catalog-group">
+<div class="catalog-category" role="row"><span class="catalog-category-label">Herbáceas perennes</span><span class="catalog-category-count">(26)</span></div>
+<div class="catalog-group-table">
+<div class="catalog-row is-header" role="row">
+  <span>Nombre</span>
+  <span>Especie</span>
+  <span>Sol</span>
+  <span>Luminosidad</span>
+  <button type="button" class="catalog-riego-toggle" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
+    Riego <span class="riego-estacion-label">(verano)</span>
+  </button>
+  <span>Clima</span>
+  <span>Suelo</span>
+  <span>Cuidado</span>
+  <span class="catalog-cell--action">Colección</span>
+</div>
 <div class="catalog-entry" data-riego="Cada 21 días" data-riegos="{&quot;verano&quot;:&quot;Cada 14 días&quot;,&quot;primavera&quot;:&quot;Cada 21 días&quot;,&quot;otoño&quot;:&quot;Cada 21 días&quot;,&quot;invierno&quot;:&quot;Cada 30 días&quot;}" data-clima="Templado" data-luz="Directa" data-ubicacion="Sol" data-suelo="Arenoso" data-cuidado="Fácil">
   <figure class="catalog-tile">
     <div class="catalog-tile-head">
@@ -2779,7 +2798,24 @@
     </div>
   </div>
 </div>
-<div class="catalog-category" role="row"><span class="catalog-category-label">Bulbosas</span></div>
+</div>
+</section>
+<section class="catalog-group">
+<div class="catalog-category" role="row"><span class="catalog-category-label">Bulbosas</span><span class="catalog-category-count">(10)</span></div>
+<div class="catalog-group-table">
+<div class="catalog-row is-header" role="row">
+  <span>Nombre</span>
+  <span>Especie</span>
+  <span>Sol</span>
+  <span>Luminosidad</span>
+  <button type="button" class="catalog-riego-toggle" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
+    Riego <span class="riego-estacion-label">(verano)</span>
+  </button>
+  <span>Clima</span>
+  <span>Suelo</span>
+  <span>Cuidado</span>
+  <span class="catalog-cell--action">Colección</span>
+</div>
 <div class="catalog-entry" data-riego="Cada 7 días" data-riegos="{&quot;verano&quot;:&quot;Cada 5 días&quot;,&quot;primavera&quot;:&quot;Cada 7 días&quot;,&quot;otoño&quot;:&quot;Cada 7 días&quot;,&quot;invierno&quot;:&quot;Cada 10 días&quot;}" data-clima="Cálido" data-luz="Directa" data-ubicacion="Sol" data-suelo="Arcilloso" data-cuidado="Fácil">
   <figure class="catalog-tile">
     <div class="catalog-tile-head">
@@ -3290,7 +3326,24 @@
     </div>
   </div>
 </div>
-<div class="catalog-category" role="row"><span class="catalog-category-label">Gramíneas</span></div>
+</div>
+</section>
+<section class="catalog-group">
+<div class="catalog-category" role="row"><span class="catalog-category-label">Gramíneas</span><span class="catalog-category-count">(16)</span></div>
+<div class="catalog-group-table">
+<div class="catalog-row is-header" role="row">
+  <span>Nombre</span>
+  <span>Especie</span>
+  <span>Sol</span>
+  <span>Luminosidad</span>
+  <button type="button" class="catalog-riego-toggle" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
+    Riego <span class="riego-estacion-label">(verano)</span>
+  </button>
+  <span>Clima</span>
+  <span>Suelo</span>
+  <span>Cuidado</span>
+  <span class="catalog-cell--action">Colección</span>
+</div>
 <div class="catalog-entry" data-riego="Cada 7 días" data-riegos="{&quot;verano&quot;:&quot;Cada 5 días&quot;,&quot;primavera&quot;:&quot;Cada 7 días&quot;,&quot;otoño&quot;:&quot;Cada 7 días&quot;,&quot;invierno&quot;:&quot;Cada 10 días&quot;}" data-clima="Templado" data-luz="Indirecta" data-ubicacion="Media sombra" data-suelo="Franco" data-cuidado="Fácil">
   <figure class="catalog-tile">
     <div class="catalog-tile-head">
@@ -4107,7 +4160,24 @@
     </div>
   </div>
 </div>
-<div class="catalog-category" role="row"><span class="catalog-category-label">Enredaderas y cubresuelos</span></div>
+</div>
+</section>
+<section class="catalog-group">
+<div class="catalog-category" role="row"><span class="catalog-category-label">Enredaderas y cubresuelos</span><span class="catalog-category-count">(26)</span></div>
+<div class="catalog-group-table">
+<div class="catalog-row is-header" role="row">
+  <span>Nombre</span>
+  <span>Especie</span>
+  <span>Sol</span>
+  <span>Luminosidad</span>
+  <button type="button" class="catalog-riego-toggle" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
+    Riego <span class="riego-estacion-label">(verano)</span>
+  </button>
+  <span>Clima</span>
+  <span>Suelo</span>
+  <span>Cuidado</span>
+  <span class="catalog-cell--action">Colección</span>
+</div>
 <div class="catalog-entry" data-riego="Cada 7 días" data-riegos="{&quot;verano&quot;:&quot;Cada 5 días&quot;,&quot;primavera&quot;:&quot;Cada 7 días&quot;,&quot;otoño&quot;:&quot;Cada 7 días&quot;,&quot;invierno&quot;:&quot;Cada 10 días&quot;}" data-clima="Frío" data-luz="Indirecta" data-ubicacion="Media sombra" data-suelo="Franco" data-cuidado="Fácil">
   <figure class="catalog-tile">
     <div class="catalog-tile-head">
@@ -5434,7 +5504,24 @@
     </div>
   </div>
 </div>
-<div class="catalog-category" role="row"><span class="catalog-category-label">Arbustos</span></div>
+</div>
+</section>
+<section class="catalog-group">
+<div class="catalog-category" role="row"><span class="catalog-category-label">Arbustos</span><span class="catalog-category-count">(12)</span></div>
+<div class="catalog-group-table">
+<div class="catalog-row is-header" role="row">
+  <span>Nombre</span>
+  <span>Especie</span>
+  <span>Sol</span>
+  <span>Luminosidad</span>
+  <button type="button" class="catalog-riego-toggle" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
+    Riego <span class="riego-estacion-label">(verano)</span>
+  </button>
+  <span>Clima</span>
+  <span>Suelo</span>
+  <span>Cuidado</span>
+  <span class="catalog-cell--action">Colección</span>
+</div>
 <div class="catalog-entry" data-riego="Cada 14 días" data-riegos="{&quot;verano&quot;:&quot;Cada 10 días&quot;,&quot;primavera&quot;:&quot;Cada 14 días&quot;,&quot;otoño&quot;:&quot;Cada 14 días&quot;,&quot;invierno&quot;:&quot;Cada 21 días&quot;}" data-clima="Templado" data-luz="Directa" data-ubicacion="Sol" data-suelo="Franco" data-cuidado="Fácil">
   <figure class="catalog-tile">
     <div class="catalog-tile-head">
@@ -6047,7 +6134,24 @@
     </div>
   </div>
 </div>
-<div class="catalog-category" role="row"><span class="catalog-category-label">Árboles</span></div>
+</div>
+</section>
+<section class="catalog-group">
+<div class="catalog-category" role="row"><span class="catalog-category-label">Árboles</span><span class="catalog-category-count">(26)</span></div>
+<div class="catalog-group-table">
+<div class="catalog-row is-header" role="row">
+  <span>Nombre</span>
+  <span>Especie</span>
+  <span>Sol</span>
+  <span>Luminosidad</span>
+  <button type="button" class="catalog-riego-toggle" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
+    Riego <span class="riego-estacion-label">(verano)</span>
+  </button>
+  <span>Clima</span>
+  <span>Suelo</span>
+  <span>Cuidado</span>
+  <span class="catalog-cell--action">Colección</span>
+</div>
 <div class="catalog-entry" data-riego="Cada 21 días" data-riegos="{&quot;verano&quot;:&quot;Cada 14 días&quot;,&quot;primavera&quot;:&quot;Cada 21 días&quot;,&quot;otoño&quot;:&quot;Cada 21 días&quot;,&quot;invierno&quot;:&quot;Cada 30 días&quot;}" data-clima="Frío" data-luz="Directa" data-ubicacion="Sol" data-suelo="Franco" data-cuidado="Fácil">
   <figure class="catalog-tile">
     <div class="catalog-tile-head">
@@ -7374,11 +7478,14 @@
     </div>
   </div>
 </div>
+</div>
+</section>
 <!-- catalog-rows:end -->
     </div>
   </main>
 
   <dialog id="dialog-auth" class="modal">
+    <button type="button" class="modal-close" aria-label="Cerrar">&times;</button>
     <p class="field-error" id="error-pagina-auth" hidden></p>
     <h2 id="titulo-form-auth">Iniciar sesión</h2>
 

@@ -13,6 +13,7 @@ export function wireAuthModal() {
   const form = qs('#form-auth', dialog);
   const errorEl = qs('#error-auth', dialog);
   const statusEl = qs('#status-auth', dialog);
+  const closeBtn = qs('.modal-close', dialog);
   const toggleBtn = qs('#btn-toggle-auth', dialog);
   const submitBtn = qs('#btn-submit-auth', dialog);
   const titulo = qs('#titulo-form-auth', dialog);
@@ -41,6 +42,10 @@ export function wireAuthModal() {
     modo = 'login';
     actualizarModo();
   }
+
+  // Cerrar con la X es un descarte, igual que Escape o el backdrop: el listener
+  // de `close` de más abajo se encarga de limpiar el formulario y avisar.
+  closeBtn?.addEventListener('click', () => dialog.close());
 
   toggleBtn.addEventListener('click', () => {
     modo = modo === 'login' ? 'signup' : 'login';

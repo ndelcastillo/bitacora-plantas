@@ -35,7 +35,7 @@
       Menú
     </button>
     <div class="catalog-meta">
-      <p>Buenos Aires, ARG 23:46</p>
+      <p>Buenos Aires, ARG <time data-reloj>23:46</time></p>
       <button type="button" class="catalog-auth-btn" data-auth-nav>Iniciar sesión</button>
     </div>
   </header>
@@ -49,7 +49,7 @@
       <a class="catalog-sidebar-link" href="index.html">Index</a>
       <a class="catalog-sidebar-link is-active" href="coleccion.html">Colección <span id="sidebar-coleccion-count">(0)</span></a>
     </nav>
-    <p class="catalog-sidebar-datetime">Buenos Aires, ARG 23:46</p>
+    <p class="catalog-sidebar-datetime">Buenos Aires, ARG <time data-reloj>23:46</time></p>
     <button type="button" class="catalog-sidebar-auth-btn" data-auth-nav>Iniciar sesión</button>
   </aside>
 
@@ -102,6 +102,7 @@
   </div>
 
   <dialog id="dialog-auth" class="modal">
+    <button type="button" class="modal-close" aria-label="Cerrar">&times;</button>
     <p class="field-error" id="error-pagina-auth" hidden></p>
     <h2 id="titulo-form-auth">Iniciar sesión</h2>
 

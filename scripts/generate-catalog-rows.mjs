@@ -315,26 +315,63 @@ function rowHtml(row) {
 </div>`;
 }
 
-function categoryHtml(label) {
-  return `<div class="catalog-category" role="row"><span class="catalog-category-label">${escapeAttr(label)}</span></div>`;
+/**
+ * Cada categoría abre con su nombre, la línea, y su propia fila de títulos de
+ * columna. El toggle de estación se repite con ella, por eso usa clases y no
+ * `id`: con siete categorías, un `id` quedaría duplicado siete veces.
+ */
+function headerHtml() {
+  return `<div class="catalog-row is-header" role="row">
+  <span>Nombre</span>
+  <span>Especie</span>
+  <span>Sol</span>
+  <span>Luminosidad</span>
+  <button type="button" class="catalog-riego-toggle" data-estacion="verano" aria-label="Riego en verano. Clic para cambiar estación">
+    Riego <span class="riego-estacion-label">(verano)</span>
+  </button>
+  <span>Clima</span>
+  <span>Suelo</span>
+  <span>Cuidado</span>
+  <span class="catalog-cell--action">Colección</span>
+</div>`;
+}
+
+function categoryHtml(label, cantidad) {
+  return `<div class="catalog-category" role="row"><span class="catalog-category-label">${escapeAttr(label)}</span><span class="catalog-category-count">(${cantidad})</span></div>`;
 }
 
 const START_MARKER = '<!-- catalog-rows:start -->';
 const END_MARKER = '<!-- catalog-rows:end -->';
+const CATEGORIAS_PATH = path.join(__dirname, '..', 'js/utils/catalog-categorias-data.js');
 
 const collator = new Intl.Collator('es', { sensitivity: 'base' });
 
 function main() {
   const blocks = [];
 
+  // Cada categoría se envuelve en su propio elemento para que el atenuado por
+  // hover quede acotado a ella: `.catalog-group:hover` no puede alcanzar a las
+  // plantas de las otras categorías. Con el DOM plano no había forma de
+  // expresarlo en CSS, porque no existe un selector de "hermanos hasta el
+  // próximo encabezado".
   for (const { label, plants } of CATEGORIES) {
-    blocks.push({ categoryHeader: label });
     const sorted = [...plants].sort((a, b) => collator.compare(a[0], b[0]));
-    blocks.push(...sorted.map((p) => buildRow(p, label)));
+    blocks.push({ categoryHeader: label, rows: sorted.map((p) => buildRow(p, label)) });
   }
 
+  // El título de la categoría queda FUERA de `.catalog-group-table`: el atenuado
+  // por hover se dispara con la tabla, no con el título, que es enorme y ocupa
+  // media pantalla.
   const html = blocks
-    .map((b) => (b.categoryHeader ? categoryHtml(b.categoryHeader) : rowHtml(b)))
+    .map(
+      (b) => `<section class="catalog-group">
+${categoryHtml(b.categoryHeader, b.rows.length)}
+<div class="catalog-group-table">
+${headerHtml()}
+${b.rows.map(rowHtml).join('\n')}
+</div>
+</section>`
+    )
     .join('\n');
 
   const plantas = fs.readFileSync(PLANTAS_PATH, 'utf8');
@@ -352,8 +389,27 @@ function main() {
 
   fs.writeFileSync(PLANTAS_PATH, replaced, 'utf8');
 
-  const totalRows = blocks.filter((b) => !b.categoryHeader).length;
+  const totalRows = blocks.reduce((n, b) => n + b.rows.length, 0);
   console.log(`Generadas ${totalRows} filas en ${CATEGORIES.length} categorías, ordenadas alfabéticamente.`);
+  writeCategoriasModule();
 }
 
-main();
+function writeCategoriasModule() {
+  const map = {};
+  for (const { label, plants } of CATEGORIES) {
+    for (const plant of plants) {
+      const row = buildRow(plant, label);
+      map[`${row.name}::${row.species}`] = label;
+      map[row.id] = label;
+    }
+  }
+  const body = `export const CATEGORIA_POR_CLAVE = ${JSON.stringify(map, null, 2)};\n`;
+  fs.writeFileSync(CATEGORIAS_PATH, body, 'utf8');
+  console.log(`Índice de categorías escrito en ${path.relative(path.join(__dirname, '..'), CATEGORIAS_PATH)}.`);
+}
+
+if (process.argv.includes('--categorias-only')) {
+  writeCategoriasModule();
+} else {
+  main();
+}

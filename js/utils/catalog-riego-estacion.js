@@ -43,8 +43,12 @@ export function riegoParaEstacion(riegos, fallback, estacion) {
   return fallback || '—';
 }
 
+// Por clase y no por `id`: el header de columnas se repite en cada categoría,
+// así que hay un toggle de estación por categoría y todos se sincronizan acá.
+const SELECTOR_TOGGLE = '.catalog-riego-toggle, .coleccion-riego-btn';
+
 function togglesEnPagina() {
-  return qsa('#riego-estacion, .coleccion-riego-btn');
+  return qsa(SELECTOR_TOGGLE);
 }
 
 function applyEstacion(root, estacion) {
@@ -56,7 +60,7 @@ function applyEstacion(root, estacion) {
     );
   });
 
-  qsa('#riego-estacion-label, .coleccion-card-estacion').forEach((label) => {
+  qsa('.riego-estacion-label, .coleccion-card-estacion').forEach((label) => {
     label.textContent = `(${estacion})`;
   });
 
@@ -85,7 +89,7 @@ export function wireRiegoEstacion(root, { onChange } = {}) {
   onChange?.(initial);
 
   root.addEventListener('click', (event) => {
-    const toggle = event.target.closest('#riego-estacion, .coleccion-riego-btn');
+    const toggle = event.target.closest(SELECTOR_TOGGLE);
     if (!toggle) return;
 
     event.preventDefault();
@@ -99,21 +103,9 @@ export function wireRiegoEstacion(root, { onChange } = {}) {
     onChange?.(next);
   });
 
-  // Index: el toggle vive fuera de #catalog-rows
-  const headerToggle = qs('#riego-estacion');
-  if (headerToggle && !root.contains(headerToggle)) {
-    headerToggle.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      const current = headerToggle.dataset.estacion || estacionActual();
-      const index = ESTACIONES.indexOf(current);
-      const next = ESTACIONES[(index + 1) % ESTACIONES.length];
-      guardarEstacion(next);
-      applyEstacion(root, next);
-      onChange?.(next);
-    });
-  }
+  // Antes había un listener aparte para el toggle del header, que vivía fuera de
+  // #catalog-rows. Ahora el header se genera dentro de cada categoría, o sea
+  // dentro de `root`, y lo cubre el listener delegado de arriba.
 }
 
 export function refreshRiegoEstacion(root) {

@@ -254,6 +254,9 @@ select.input {
   --catalog-gap: var(--space-4);
   --catalog-inline: var(--space-3);
 
+  /* Ancestro posicionado para el panel de filtros, que se superpone al
+     contenido en lugar de empujarlo. */
+  position: relative;
   min-height: 100vh;
   background: var(--color-white);
   color: var(--color-black);
@@ -270,11 +273,8 @@ select.input {
   display: flex;
   flex-direction: column;
   gap: clamp(48px, 8vw, 96px);
-  padding-bottom: var(--space-15);
-}
-
-.catalog-page--coleccion .catalog-rows:hover .catalog-entry {
-  opacity: 1;
+  padding-bottom: var(--space-15);  
+  margin-top: 70px !important;
 }
 
 .catalog-page--coleccion .catalog-entry.is-filtered-out {
@@ -382,7 +382,7 @@ select.input {
   grid-template-columns: var(--catalog-columns);
   column-gap: var(--catalog-gap);
   align-items: start;
-  padding: var(--space-3) var(--catalog-inline) var(--space-15);
+  padding: var(--space-3) var(--catalog-inline) var(--space-5);
 }
 
 .catalog-header-left {
@@ -452,10 +452,10 @@ select.input {
   color: var(--color-black);
   font-family: inherit;
   font-size: inherit;
-  line-height: 1;
-  text-decoration: underline;
+  line-height: 1;  
   text-underline-offset: 4px;
   cursor: pointer;
+  margin-top: -4px;
 }
 
 .catalog-auth-btn[disabled] {
@@ -542,8 +542,16 @@ select.input {
   border: 0;
 }
 
+/* Fuera del flujo para que abrirlo no empuje la lista hacia abajo: se muestra
+   por encima del contenido. Sin `top`, conserva su posición estática (justo
+   debajo del header); el fondo blanco evita que las filas se vean por detrás. */
 .catalog-filters {
-  padding: 0 var(--catalog-inline) var(--space-8);
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  background: var(--color-white);
+  padding: 0 var(--catalog-inline) var(--space-2);
 }
 
 .catalog-filters.is-collapsed {
@@ -616,9 +624,18 @@ select.input {
   display: none !important;
 }
 
+#coleccion-contenido {
+  margin-top: -70px;
+}
+
 .catalog-list {
   padding: 0 var(--catalog-inline) var(--space-15);
-  margin-top: 54px;
+  margin-top: 70px;
+  z-index: 2;
+}
+
+.catalog-entry:first-child {
+  margin-top: 140px;
 }
 
 .catalog-tile {
@@ -665,13 +682,33 @@ select.input {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   column-gap: 16px;
-  row-gap: 92px;
+  row-gap: 22px;
   align-items: start;
-  margin-top: 54px;
+  margin-top: 70px;
 }
 
-.catalog-page[data-view='2'] .catalog-rows:hover .catalog-entry {
-  opacity: 1;
+/* La vista 2 son tiles, no una lista: ahí el atenuado por hover no aplica. */
+@media (hover: hover) {
+  .catalog-page[data-view='2'] .catalog-group-table:hover .catalog-entry {
+    opacity: 1;
+  }
+}
+
+/* En la vista 2 `.catalog-rows` es un grid de 6 columnas y las plantas son sus
+   ítems. El wrapper de categoría rompería esa grilla, así que acá no genera
+   caja y sus hijos siguen participando del grid del contenedor. */
+.catalog-page[data-view='2'] .catalog-group,
+.catalog-page[data-view='3'] .catalog-group,
+.catalog-page[data-view='2'] .catalog-group-table,
+.catalog-page[data-view='3'] .catalog-group-table {
+  display: contents;
+}
+
+/* Lleva `.catalog-page` para empatar la especificidad de la regla de `contents`
+   de arriba (0,3,0) y ganarle por orden. Sin eso, en la vista 2 una categoría
+   vacía seguiría en `contents`. */
+.catalog-page .catalog-group.is-empty {
+  display: none;
 }
 
 .catalog-page[data-view='2'] .catalog-entry .catalog-row {
@@ -785,6 +822,11 @@ select.input {
 }
 
 .catalog-gallery-3d-stage {
+  /* Altura del centro del conjunto dentro del stage. La usan el anillo y el
+     preview, así que moverla los sube o baja a los dos juntos y el preview
+     nunca se descentra. */
+  --gallery-3d-center: 43%;
+
   position: fixed;
   top: var(--gallery-3d-top, 0px);
   left: 0;
@@ -792,13 +834,17 @@ select.input {
   height: calc(100vh - var(--gallery-3d-top, 0px));
   overflow: hidden;
   perspective: 1500px;
+  margin-top: -30px;
 }
 
+/* Centrado sobre el centro del anillo, que la regla de arriba fija al 50% del
+   stage. Antes era un `top: 30%` calibrado a ojo para la escala de desktop, y
+   por eso se desalineaba al achicar el anillo. */
 .catalog-gallery-3d-preview-wrap {
   position: absolute;
-  top: 30%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: 300px;
   z-index: 1;
   display: flex;
@@ -836,12 +882,20 @@ select.input {
   color: var(--color-black);
 }
 
+/* El radio del anillo es fijo (400px, ver TRANSFORM_ORIGIN en
+   catalog-gallery-3d.js), así que mide ~800px de ancho. En pantallas chicas no
+   entra y se corta a los costados: se compensa escalándolo. */
+/* Las fichas orbitan un punto 400px por debajo del elemento (transform-origin),
+   así que el centro visible del anillo cae 260px * escala más abajo que su
+   `top`. Restando eso al 50%, el centro queda siempre a media altura del stage
+   sea cual sea la escala — que es lo que permite centrar el preview. A escala
+   0.9 da 19%, el valor fijo que tenía antes. */
 .catalog-gallery-3d-ring {
   position: absolute;
-  top: 19%;
+  top: calc(50% - 260px * var(--gallery-3d-scale, 0.9));
   left: 49%;
   transform-style: preserve-3d;
-  transform: translateX(-50%) rotateX(55deg) scale(0.9);
+  transform: translateX(-50%) rotateX(55deg) scale(var(--gallery-3d-scale, 0.9));
 }
 
 .catalog-gallery-3d-item {
@@ -872,18 +926,55 @@ select.input {
 }
 
 @media (max-width: 799px) {
+  .catalog-gallery-3d-ring {
+    --gallery-3d-scale: 0.8;
+  }
+
   .catalog-gallery-3d-item {
     width: 56px;
     height: 74px;
     margin: 6px;
   }
 
+  /* El preview mantiene la proporción de desktop (un tercio del ancho del
+     anillo): más grande que eso tapa las fichas del frente y el botón queda
+     ilegible sobre ellas. */
   .catalog-gallery-3d-preview-wrap {
-    width: 220px;
+    width: 230px;
   }
 
   .catalog-gallery-3d-preview {
-    height: 150px;
+    height: 155px;
+  }
+}
+
+@media (max-width: 639px) {
+  .catalog-gallery-3d-ring {
+    --gallery-3d-scale: 0.7;
+  }
+
+  .catalog-gallery-3d-preview-wrap {
+    width: 200px;
+  }
+
+  .catalog-gallery-3d-preview {
+    height: 135px;
+  }
+}
+
+@media (max-width: 479px) {
+  .catalog-gallery-3d-ring {
+    --gallery-3d-scale: 0.6;
+  }
+
+  .catalog-gallery-3d-preview-wrap {
+    width: 170px;
+  }
+
+  .catalog-gallery-3d-preview {
+    height: 95px;
+    width: 140px;
+    margin-top: -10px;
   }
 }
 
@@ -951,37 +1042,64 @@ select.input {
   color: var(--color-white);
 }
 
-.catalog-page:not([data-view='2']):not([data-view='3']) .catalog-rows:hover .catalog-entry.is-in-coleccion {
-  opacity: 1;
+/* Las plantas que ya están en tu colección no se apagan: es la señal de que son
+   tuyas, y perderla al pasar el cursor sería peor que el propio atenuado. */
+@media (hover: hover) {
+  .catalog-page:not([data-view='2']):not([data-view='3']) .catalog-group-table:hover .catalog-entry.is-in-coleccion {
+    opacity: 1;
+  }
 }
 
 .catalog-row.is-header {
   font-weight: 400;
-  margin-bottom: var(--space-4);
+  margin-top: var(--space-3);
   cursor: default;
 }
 
+/* La línea va DEBAJO del nombre de la categoría: primero el nombre, después la
+   línea, después los títulos de columna. */
 .catalog-category {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
   padding: var(--space-4) 0 var(--space-2);
-  margin-top: var(--space-6);
-  border-top: 1px solid var(--color-black);
+  margin-top: 60px;
+  border-bottom: 1px solid var(--color-black);
 }
 
-.catalog-category:first-child {
+/* Solo la primera categoría del catálogo va sin margen. Va por `.catalog-group`
+   y no por `.catalog-category:first-child`, porque cada categoría es el primer
+   hijo de su grupo y ese selector las alcanzaba a todas. */
+.catalog-group:first-child .catalog-category {
   margin-top: 0;
-  margin-bottom: 10px;
 }
 
+/* El contador comparte todas las reglas del título — incluidos los tamaños por
+   breakpoint de más abajo — para que crezca y se achique junto con él. */
 .catalog-category-label {
   font-size: 112px;
-  margin-bottom: 40px;
+  margin-bottom: 0;
   letter-spacing: -6px;
   color: var(--color-black);
 }
 
-.catalog-page[data-view='2'] .catalog-category,
+.catalog-category-count {
+  font-size: 54px;
+  margin-top: -5px;
+  letter-spacing: -5px;
+  color: var(--color-black);
+}
+
 .catalog-page[data-view='3'] .catalog-category {
   display: none;
+}
+
+/* La vista 2 también separa por categoría. Como los grupos son `display:
+   contents`, el título es un ítem más del grid de 6 columnas: ocupa la fila
+   entera para que las tiles de cada categoría arranquen debajo de su nombre. */
+.catalog-page[data-view='2'] .catalog-category {
+  grid-column: 1 / -1;
 }
 
 .catalog-riego-toggle {
@@ -1001,13 +1119,22 @@ select.input {
   text-align: left;
 }
 
-.catalog-rows:hover .catalog-entry {
-  opacity: 0.2;
-}
+/* El atenuado por hover solo tiene sentido donde hay un puntero de verdad. En
+   táctil los navegadores emulan `:hover` sobre el elemento que tocaste y lo
+   dejan pegado, así que al scrollear se encendía una fila al azar. */
+/* El disparador es `.catalog-group-table` (los encabezados y las filas de UNA
+   categoría), no `.catalog-group`, que además incluye el título gigante: pasar
+   el cursor por "Plantas de interior" no tiene que apagar nada. Y al ser por
+   categoría, tampoco alcanza a las plantas de las otras. */
+@media (hover: hover) {
+  .catalog-group-table:hover .catalog-entry {
+    opacity: 0.2;
+  }
 
-.catalog-rows:hover .catalog-entry:hover,
-.catalog-rows:hover .catalog-entry.is-open {
-  opacity: 1;
+  .catalog-group-table:hover .catalog-entry:hover,
+  .catalog-group-table:hover .catalog-entry.is-open {
+    opacity: 1;
+  }
 }
 
 .catalog-accordion {
@@ -1197,8 +1324,14 @@ select.input {
 }
 
 @media (max-width: 1024px) {
-  .catalog-category-label {
+  .catalog-category-label,
+  .catalog-category-count {
     font-size: 54px;
+    letter-spacing: -3px;
+  }
+
+  .catalog-category-count {
+    font-size: 26px;
     letter-spacing: -2px;
   }
 }
@@ -1210,11 +1343,6 @@ select.input {
 
   .catalog-page[data-view='2'] .catalog-rows {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .catalog-category-label {
-    font-size: 54px;
-    letter-spacing: -2px;
   }
 }
 
@@ -1228,11 +1356,6 @@ select.input {
   .catalog-page[data-view='2'] .catalog-rows {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-
-  .catalog-category-label {
-    font-size: 40px;
-    letter-spacing: -2px;
-  }
 }
 
 @media (max-width: 460px) {
@@ -1244,6 +1367,11 @@ select.input {
     font-size: 34px;
     letter-spacing: -1.5px;
   }
+
+  .catalog-category-count {
+    font-size: 16px;
+    letter-spacing: -1px;
+  }
 }
 
 @media (max-width: 379px) {
@@ -1254,12 +1382,36 @@ select.input {
 }
 
 .modal {
+  position: relative;
   width: 100%;
   max-width: 420px;
   border: 1px solid var(--color-border);
   border-radius: 0;
   padding: var(--space-8);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-black);
+  font-family: inherit;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  opacity: 0.6;
 }
 
 .modal::backdrop {
@@ -1818,6 +1970,7 @@ body.sidebar-open::before {
   }
 
 }
+
 .bitacora-volver {
   grid-column: 6;
   justify-self: start;
