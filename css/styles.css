@@ -1830,7 +1830,8 @@ body.sidebar-open::before {
 .bitacora-heading,
 #bitacora-contenido,
 #mensaje-sesion,
-#mensaje-faltante {
+#mensaje-faltante,
+#error-pagina {
   padding-left: var(--catalog-inline);
   padding-right: var(--catalog-inline);
 }
@@ -1913,10 +1914,10 @@ body.sidebar-open::before {
 
 @media (max-width: 799px) {
   .catalog-page--bitacora .catalog-list,
-  .bitacora-heading,
   #bitacora-contenido,
   #mensaje-sesion,
-  #mensaje-faltante {
+  #mensaje-faltante,
+  #error-pagina {
     padding-left: var(--space-4);
     padding-right: var(--space-4);
   }

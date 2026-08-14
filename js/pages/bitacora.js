@@ -13,7 +13,7 @@ import { syncColeccionNavCount } from '../utils/coleccion-nav.js';
 import { wireAuthModal } from '../utils/auth-modal.js';
 import { wireAuthNav } from '../utils/auth-nav.js';
 import { wireReloj } from '../utils/reloj.js';
-import { iniciarPagina } from '../utils/guard.js';
+import { iniciarPagina, mostrarErrorDePagina } from '../utils/guard.js';
 
 const ETIQUETAS_TIPO = {
   regar: 'Regar',
@@ -128,6 +128,8 @@ function mostrarSolo(idVisible) {
   qs('#mensaje-sesion').hidden = idVisible !== 'mensaje-sesion';
   qs('#mensaje-faltante').hidden = idVisible !== 'mensaje-faltante';
   qs('#bitacora-contenido').hidden = idVisible !== 'bitacora-contenido';
+  const errorEl = qs('#error-pagina');
+  if (errorEl) errorEl.hidden = idVisible !== 'error-pagina';
 }
 
 async function pintarBitacora(planta) {
@@ -142,28 +144,36 @@ async function pintarBitacora(planta) {
 function wireFormCuidado(planta) {
   const form = qs('#form-cuidado');
   const errorEl = qs('#error-cuidado');
+  const submitBtn = form.querySelector('[type="submit"]');
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (submitBtn?.disabled) return;
     clearError(errorEl);
 
-    if (!(await getSession())) {
-      showError(errorEl, 'Iniciá sesión para registrar un cuidado.');
-      authNav.sync();
-      authModal.open({
-        onSuccess: async () => {
-          await authNav.sync();
-          clearError(errorEl);
-        },
-      });
-      return;
+    const textoOriginal = submitBtn?.textContent;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Registrando…';
     }
 
-    const tipo = qs('#tipo-cuidado').value;
-    const fecha = qs('#fecha-cuidado').value;
-    const notas = qs('#notas-cuidado').value || null;
-
     try {
+      if (!(await getSession())) {
+        showError(errorEl, 'Iniciá sesión para registrar un cuidado.');
+        authNav.sync();
+        authModal.open({
+          onSuccess: async () => {
+            await authNav.sync();
+            clearError(errorEl);
+          },
+        });
+        return;
+      }
+
+      const tipo = qs('#tipo-cuidado').value;
+      const fecha = qs('#fecha-cuidado').value;
+      const notas = qs('#notas-cuidado').value || null;
+
       await registrarCuidadoColeccion(planta.id, tipo, fechaInputAISO(fecha), notas);
       form.reset();
       qs('#tipo-cuidado').value = 'regar';
@@ -171,6 +181,11 @@ function wireFormCuidado(planta) {
       await pintarBitacora(planta);
     } catch (err) {
       showError(errorEl, err.message);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = textoOriginal;
+      }
     }
   });
 }
@@ -186,7 +201,8 @@ async function cargarPlanta() {
     planta = await obtenerItemColeccion(coleccionId);
   } catch (err) {
     console.error('No se pudo cargar la planta', err);
-    mostrarSolo('mensaje-faltante');
+    mostrarSolo('error-pagina');
+    mostrarErrorDePagina('No pudimos cargar esta planta. Probá otra vez.');
     return null;
   }
 
@@ -195,8 +211,16 @@ async function cargarPlanta() {
     return null;
   }
 
+  try {
+    await pintarBitacora(planta);
+  } catch (err) {
+    console.error('No se pudo cargar la bitácora', err);
+    mostrarSolo('error-pagina');
+    mostrarErrorDePagina('No pudimos cargar esta planta. Probá otra vez.');
+    return null;
+  }
+
   mostrarSolo('bitacora-contenido');
-  await pintarBitacora(planta);
   return planta;
 }
 
@@ -206,6 +230,7 @@ const authNav = wireAuthNav({
     authModal.open({
       onSuccess: async () => {
         await authNav.sync();
+        await syncColeccionNavCount();
         const planta = await cargarPlanta();
         if (planta && !qs('#form-cuidado').dataset.wired) {
           qs('#form-cuidado').dataset.wired = '1';
