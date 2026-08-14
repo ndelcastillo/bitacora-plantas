@@ -212,6 +212,21 @@ export async function quitarDeColeccion(id) {
   }
 }
 
+export async function obtenerItemColeccion(id) {
+  const session = await getSession();
+  if (!session?.user?.id) return null;
+
+  const { data, error } = await supabase
+    .from('user_collection')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
 export function idDesdePlanta({ nombre, especie, ubicacion }) {
   return [nombre, especie, ubicacion].join('::').toLowerCase();
 }
