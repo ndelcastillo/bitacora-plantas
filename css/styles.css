@@ -292,24 +292,9 @@ select.input {
   min-width: 0;
 }
 
-.coleccion-card-title {
-  margin: 0;
-  padding: 12px 0 0;
-  margin-bottom: -5px;
-  border-top: 1px solid var(--color-black);
-}
-
-.coleccion-card-title h2 {
-  margin: 0;
-  font-family: inherit;
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 1.2;
-}
-
 .coleccion-card-facts {
   list-style: none;
-  margin: var(--space-5) 0 0;
+  margin: 0;
   padding: 0;
 }
 
@@ -329,8 +314,19 @@ select.input {
   border-top: 1px solid var(--color-black);
 }
 
-.coleccion-card-facts li span:last-child {
+.coleccion-card-facts li span:last-child,
+.coleccion-card-facts li h2,
+.coleccion-card-facts li .coleccion-bitacora-link {
+  margin: 0;
+  font: inherit;
+  font-weight: 400;
   text-align: right;
+}
+
+.coleccion-bitacora-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .coleccion-riego-btn,
