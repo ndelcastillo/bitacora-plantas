@@ -31,10 +31,30 @@ function cacheValido() {
   return coleccionCache && Date.now() - cacheTimestamp < CACHE_DURATION;
 }
 
+/**
+ * Borra el respaldo local. El cache no está scopeado por usuario, así que al
+ * cerrar sesión hay que vaciarlo: si no, la rama de error de `leerDeSupabase`
+ * podría devolverle a la próxima persona la colección de la anterior.
+ */
+export function limpiarCacheColeccion() {
+  coleccionCache = null;
+  cacheTimestamp = 0;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // localStorage puede fallar (modo privado, cuota). No hay nada que hacer.
+  }
+}
+
 async function leerDeSupabase() {
   const session = await getSession();
   if (!session?.user?.id) {
-    return leerDelCache();
+    // Sin sesión no hay colección que mostrar. El cache de localStorage es del
+    // último usuario logueado: devolverlo acá dejaría su colección a la vista
+    // después de cerrar sesión. Lo vaciamos acá además de en el logout, para
+    // cubrir también las sesiones que vencen solas.
+    limpiarCacheColeccion();
+    return [];
   }
 
   try {
@@ -145,24 +165,42 @@ export async function quitarDeColeccion(id) {
   }
 
   try {
+    // El id puede venir como uuid de la fila (`id`) o como id de catálogo
+    // (`planta_id`, tipo "nombre::especie::ubicacion"). No se puede filtrar con
+    // `.or(...)` sobre ambas columnas: comparar `id` (uuid) contra un texto de
+    // catálogo hace fallar la query entera. Traemos las claves y resolvemos acá.
     const { data: items, error: selectError } = await supabase
       .from('user_collection')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .eq('planta_id', id);
+      .select('id, planta_id')
+      .eq('user_id', session.user.id);
 
     if (selectError) throw selectError;
-    if (!items || items.length === 0) {
+
+    const objetivos = (items || [])
+      .filter((item) => item.planta_id === id || item.id === id)
+      .map((item) => item.id);
+
+    if (objetivos.length === 0) {
       return { ok: false, reason: 'missing' };
     }
 
-    const { error: deleteError } = await supabase
+    // `.select()` devuelve las filas borradas: si RLS bloquea el delete no hay
+    // error, pero tampoco filas, y eso sería un fallo silencioso.
+    const { data: borradas, error: deleteError } = await supabase
       .from('user_collection')
       .delete()
       .eq('user_id', session.user.id)
-      .eq('planta_id', id);
+      .in('id', objetivos)
+      .select('id');
 
     if (deleteError) throw deleteError;
+
+    if (!borradas || borradas.length === 0) {
+      console.error(
+        'El delete de user_collection no afectó filas (¿falta una policy RLS de delete?)'
+      );
+      return { ok: false, reason: 'error' };
+    }
 
     // Invalidar cache
     coleccionCache = null;

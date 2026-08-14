@@ -14,7 +14,8 @@ import {
   wireRiegoEstacion,
 } from '../utils/catalog-riego-estacion.js';
 import { wireAuthModal } from '../utils/auth-modal.js';
-import { iniciarPagina } from '../utils/guard.js';
+import { wireAuthNav } from '../utils/auth-nav.js';
+import { iniciarPagina, mostrarErrorDePagina } from '../utils/guard.js';
 
 function riegosDePlanta(planta) {
   if (planta.riegos && typeof planta.riegos === 'object') return planta.riegos;
@@ -25,6 +26,10 @@ function riegosDePlanta(planta) {
     primavera: fallback,
     otoño: fallback,
   };
+}
+
+function idDeColeccion(planta) {
+  return planta.planta_id || planta.id || '';
 }
 
 function entryMarkup(planta) {
@@ -57,7 +62,7 @@ function entryMarkup(planta) {
             <button
               type="button"
               class="coleccion-eliminar-btn"
-              data-id="${escapeHtml(planta.id)}"
+              data-id="${escapeHtml(idDeColeccion(planta))}"
               title="Eliminar de Colección"
               aria-label="Eliminar de Colección"
             >Eliminar</button>
@@ -94,7 +99,7 @@ async function render(root) {
     const riegos = riegosDePlanta(planta);
     const entry = document.createElement('div');
     entry.className = 'catalog-entry';
-    entry.dataset.id = planta.planta_id || planta.id || '';
+    entry.dataset.id = idDeColeccion(planta);
     entry.dataset.nombre = planta.nombre || '';
     entry.dataset.especie = planta.especie || '';
     entry.dataset.riego = riegoParaEstacion(riegos, planta.riego, estacionActual());
@@ -124,10 +129,32 @@ function wireEliminar(root) {
 
     const id = btn.dataset.id;
     if (!id) return;
+    if (btn.disabled) return;
 
-    const result = await quitarDeColeccion(id);
-    if (result.ok || result.reason === 'missing') {
-      await render(root);
+    btn.disabled = true;
+    const textoOriginal = btn.textContent;
+    btn.textContent = 'Eliminando…';
+
+    try {
+      const result = await quitarDeColeccion(id);
+
+      if (result.ok || result.reason === 'missing') {
+        await render(root);
+        return;
+      }
+
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+      mostrarErrorDePagina(
+        result.reason === 'not_authenticated'
+          ? 'Iniciá sesión de nuevo para editar tu colección.'
+          : 'No pudimos eliminar la planta de tu colección. Probá otra vez.'
+      );
+    } catch (error) {
+      console.error('Error eliminando de la colección', error);
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+      mostrarErrorDePagina('No pudimos eliminar la planta de tu colección. Probá otra vez.');
     }
   });
 }
@@ -170,12 +197,31 @@ function wireSidebarToggle() {
   });
 }
 
+const MENSAJE_SIN_PLANTAS =
+  'Todavía no hay plantas en tu colección. Sumá algunas desde Index con (Agregar).';
+const MENSAJE_SIN_SESION = 'Iniciá sesión para ver las plantas de tu colección.';
+
 const root = qs('#coleccion-rows');
 const authModal = wireAuthModal();
+const authNav = wireAuthNav({ onLogin: abrirLogin });
 
-function iniciarColeccion() {
-  qs('#coleccion-contenido').hidden = false;
-  render(root);
+let coleccionActiva = false;
+
+function abrirLogin() {
+  authModal.open({
+    onSuccess: async () => {
+      await authNav.sync();
+      activarColeccion();
+    },
+  });
+}
+
+/**
+ * Listeners que no dependen de la sesión (menú, filtros, borrado). Se montan una
+ * sola vez: si alguien inicia sesión sin recargar, `activarColeccion` vuelve a
+ * correr pero esto no.
+ */
+function montarChrome() {
   wireEliminar(root);
   wireCatalogFilters(root);
   wireFiltersToggle();
@@ -183,7 +229,27 @@ function iniciarColeccion() {
   wireRiegoEstacion(root, {
     onChange: () => refreshCatalogFilters(root),
   });
+}
+
+function mostrarEstadoSinSesion() {
+  if (root) root.innerHTML = '';
+  const vacio = qs('#mensaje-vacio');
+  if (vacio) {
+    vacio.textContent = MENSAJE_SIN_SESION;
+    vacio.hidden = false;
+  }
   syncColeccionNavCount();
+}
+
+function activarColeccion() {
+  const vacio = qs('#mensaje-vacio');
+  if (vacio) vacio.textContent = MENSAJE_SIN_PLANTAS;
+
+  render(root);
+  syncColeccionNavCount();
+
+  if (coleccionActiva) return;
+  coleccionActiva = true;
 
   // Escuchar cambios en tiempo real
   const unsubscribe = onColeccionChange(() => {
@@ -195,16 +261,16 @@ function iniciarColeccion() {
 }
 
 iniciarPagina(async function init() {
-  const session = await getSession();
-  if (session) {
-    iniciarColeccion();
+  // La página se muestra siempre: sin sesión queda vacía con el botón de
+  // "Iniciar sesión" del header/sidebar, en vez de expulsar a index.html.
+  qs('#coleccion-contenido').hidden = false;
+  montarChrome();
+  await authNav.sync();
+
+  if (await getSession()) {
+    activarColeccion();
     return;
   }
 
-  authModal.open({
-    onSuccess: () => iniciarColeccion(),
-    onDismiss: () => {
-      window.location.href = 'index.html';
-    },
-  });
+  mostrarEstadoSinSesion();
 });
