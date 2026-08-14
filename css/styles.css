@@ -1903,8 +1903,15 @@ body.sidebar-open::before {
   margin: var(--space-2) 0 0;
 }
 
+@media (max-width: 1024px) {
+  .bitacora-volver {
+    grid-area: filters;
+    align-self: start;
+    justify-self: start;
+  }
+}
+
 @media (max-width: 799px) {
-  .bitacora-volver,
   .catalog-page--bitacora .catalog-list,
   .bitacora-heading,
   #bitacora-contenido,
@@ -1912,9 +1919,5 @@ body.sidebar-open::before {
   #mensaje-faltante {
     padding-left: var(--space-4);
     padding-right: var(--space-4);
-  }
-
-  .bitacora-volver {
-    grid-column: 1;
   }
 }
